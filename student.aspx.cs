@@ -1,110 +1,230 @@
 using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
 
-namespace ASPNetStudentCRUD
+namespace LAB9
 {
-    public partial class Student : System.Web.UI.Page
+    public partial class demo : System.Web.UI.Page
     {
-        // ✅ Replace with your SQL Server connection string
-        string connectionString = @"Data Source=.\SQLEXPRESS;Initial Catalog=StudentDB;Integrated Security=True";
+        public string strconstr = ConfigurationManager.ConnectionStrings["mycon"].ConnectionString;
+        public SqlCommand cmd;
+        public SqlDataAdapter sda;
+        public DataSet ds;
+
+        public void CreateConnection()
+        {
+            SqlConnection con = new SqlConnection(strconstr);
+            cmd = new SqlCommand();
+            cmd.Connection = con;
+        }
+
+        public void OpenConnection()
+        {
+            if (cmd.Connection.State == ConnectionState.Closed)
+                cmd.Connection.Open();
+        }
+
+        public void CloseConnection()
+        {
+            if (cmd.Connection.State == ConnectionState.Open)
+                cmd.Connection.Close();
+        }
+
+        public void DisposeConnection()
+        {
+            cmd.Connection.Dispose();
+        }
+
+        public void ClearControls()
+        {
+            txtenroll.Text = "";
+            txtname.Text = "";
+            txtsem.Text = "";
+            txtspi.Text = "";
+            txtcpi.Text = "";
+        }
+
+        // ✅ Bind using Stored Procedure
+        public void BindStudentData()
+        {
+            try
+            {
+                CreateConnection();
+                OpenConnection();
+                cmd.Parameters.Clear();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "Student_Crud";
+                cmd.Parameters.AddWithValue("@Event", "SELECT");
+
+                sda = new SqlDataAdapter(cmd);
+                ds = new DataSet();
+                sda.Fill(ds);
+                grdData.DataSource = ds;
+                grdData.DataBind();
+            }
+            catch (Exception)
+            {
+                Response.Write("<script>alert('Error in BindStudentData');</script>");
+            }
+            finally
+            {
+                CloseConnection();
+                DisposeConnection();
+            }
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                BindGrid();
+                BindStudentData();
             }
         }
 
-        // ✅ Display all students
-        private void BindGrid()
+        protected void btnsubmit_Click(object sender, EventArgs e)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM Students", con);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                GridView1.DataSource = dt;
-                GridView1.DataBind();
-            }
-        }
+                CreateConnection();
+                OpenConnection();
+                cmd.Parameters.Clear();
+                cmd.CommandText = "Student_Crud";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Event", "INSERT");
+                cmd.Parameters.AddWithValue("@EnrollmentNo", Convert.ToInt32(txtenroll.Text.Trim()));
+                cmd.Parameters.AddWithValue("@StudentName", txtname.Text.Trim());
+                cmd.Parameters.AddWithValue("@StudentSemester", Convert.ToInt32(txtsem.Text.Trim()));
+                cmd.Parameters.AddWithValue("@StudentSPI", Convert.ToDecimal(txtspi.Text.Trim()));
+                cmd.Parameters.AddWithValue("@StudentCPI", Convert.ToDecimal(txtcpi.Text.Trim()));
 
-        // ✅ Add new student
-        protected void btnAdd_Click(object sender, EventArgs e)
-        {
-            using (SqlConnection con = new SqlConnection(connectionString))
+                int result = cmd.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    Response.Write("<script>alert('Record INSERTED Successfully');</script>");
+                    grdData.EditIndex = -1;
+                    BindStudentData();
+                    ClearControls();
+                }
+                else
+                {
+                    Response.Write("<script>alert('Insert Failed');</script>");
+                }
+            }
+            catch (Exception)
             {
-                string query = "INSERT INTO Students (Name, Email, Course) VALUES (@Name, @Email, @Course)";
-                SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@Name", txtName.Text.Trim());
-                cmd.Parameters.AddWithValue("@Email", txtEmail.Text.Trim());
-                cmd.Parameters.AddWithValue("@Course", txtCourse.Text.Trim());
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
+                Response.Write("<script>alert('Error in Insert');</script>");
             }
-            txtName.Text = "";
-            txtEmail.Text = "";
-            txtCourse.Text = "";
-            BindGrid();
-        }
-
-        // ✅ Edit mode
-        protected void GridView1_RowEditing(object sender, System.Web.UI.WebControls.GridViewEditEventArgs e)
-        {
-            GridView1.EditIndex = e.NewEditIndex;
-            BindGrid();
-        }
-
-        // ✅ Cancel edit
-        protected void GridView1_RowCancelingEdit(object sender, System.Web.UI.WebControls.GridViewCancelEditEventArgs e)
-        {
-            GridView1.EditIndex = -1;
-            BindGrid();
-        }
-
-        // ✅ Update student
-        protected void GridView1_RowUpdating(object sender, System.Web.UI.WebControls.GridViewUpdateEventArgs e)
-        {
-            int id = Convert.ToInt32(GridView1.DataKeys[e.RowIndex].Value.ToString());
-            string name = ((System.Web.UI.WebControls.TextBox)GridView1.Rows[e.RowIndex].Cells[1].Controls[0]).Text;
-            string email = ((System.Web.UI.WebControls.TextBox)GridView1.Rows[e.RowIndex].Cells[2].Controls[0]).Text;
-            string course = ((System.Web.UI.WebControls.TextBox)GridView1.Rows[e.RowIndex].Cells[3].Controls[0]).Text;
-
-            using (SqlConnection con = new SqlConnection(connectionString))
+            finally
             {
-                string query = "UPDATE Students SET Name=@Name, Email=@Email, Course=@Course WHERE Id=@Id";
-                SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@Name", name);
-                cmd.Parameters.AddWithValue("@Email", email);
-                cmd.Parameters.AddWithValue("@Course", course);
-                cmd.Parameters.AddWithValue("@Id", id);
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
+                CloseConnection();
+                DisposeConnection();
             }
-
-            GridView1.EditIndex = -1;
-            BindGrid();
         }
 
-        // ✅ Delete student
-        protected void GridView1_RowDeleting(object sender, System.Web.UI.WebControls.GridViewDeleteEventArgs e)
+        protected void grdData_RowEditing(object sender, GridViewEditEventArgs e)
         {
-            int id = Convert.ToInt32(GridView1.DataKeys[e.RowIndex].Value.ToString());
+            grdData.EditIndex = e.NewEditIndex;
+            BindStudentData();
+        }
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+        protected void grdData_RowCancelingEdit(object sender, GridViewCancelEditEventArgs e)
+        {
+            grdData.EditIndex = -1;
+            BindStudentData();
+        }
+
+        protected void grdData_RowDeleting(object sender, GridViewDeleteEventArgs e)
+        {
+            try
             {
-                string query = "DELETE FROM Students WHERE Id=@Id";
-                SqlCommand cmd = new SqlCommand(query, con);
-                cmd.Parameters.AddWithValue("@Id", id);
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
+                int s_id = Convert.ToInt32(grdData.DataKeys[e.RowIndex].Value);
+
+                CreateConnection();
+                OpenConnection();
+                cmd.Parameters.Clear();
+                cmd.CommandText = "Student_Crud";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Event", "DELETE");
+                cmd.Parameters.AddWithValue("@EnrollmentNo", s_id);
+
+                int result = cmd.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    Response.Write("<script>alert('Record Deleted Successfully');</script>");
+                    grdData.EditIndex = -1;
+                    BindStudentData();
+                    ClearControls();
+                }
+                else
+                {
+                    Response.Write("<script>alert('Delete Failed');</script>");
+                }
             }
-            BindGrid();
+            catch (Exception)
+            {
+                Response.Write("<script>alert('Error in Delete');</script>");
+            }
+            finally
+            {
+                CloseConnection();
+                DisposeConnection();
+            }
+        }
+
+        protected void grdData_RowUpdating(object sender, GridViewUpdateEventArgs e)
+        {
+            try
+            {
+                GridViewRow row = grdData.Rows[e.RowIndex];
+                int s_id = Convert.ToInt32(grdData.DataKeys[e.RowIndex].Value);
+                string s_name = (row.FindControl("t_txtname") as TextBox).Text;
+                string s_sem = (row.FindControl("t_txtsem") as TextBox).Text;
+                string s_spi = (row.FindControl("t_txtspi") as TextBox).Text;
+                string s_cpi = (row.FindControl("t_txtcpi") as TextBox).Text;
+
+                CreateConnection();
+                OpenConnection();
+                cmd.Parameters.Clear();
+                cmd.CommandText = "Student_Crud";
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Event", "UPDATE");
+                cmd.Parameters.AddWithValue("@EnrollmentNo", s_id);
+                cmd.Parameters.AddWithValue("@StudentName", s_name.Trim());
+                cmd.Parameters.AddWithValue("@StudentSemester", Convert.ToInt32(s_sem.Trim()));
+                cmd.Parameters.AddWithValue("@StudentSPI", Convert.ToDecimal(s_spi.Trim()));
+                cmd.Parameters.AddWithValue("@StudentCPI", Convert.ToDecimal(s_cpi.Trim()));
+
+                int result = cmd.ExecuteNonQuery();
+                if (result > 0)
+                {
+                    Response.Write("<script>alert('Record UPDATED Successfully');</script>");
+                    grdData.EditIndex = -1;
+                    BindStudentData();
+                    ClearControls();
+                }
+                else
+                {
+                    Response.Write("<script>alert('Update Failed');</script>");
+                }
+            }
+            catch (Exception)
+            {
+                Response.Write("<script>alert('Error in Update');</script>");
+            }
+            finally
+            {
+                CloseConnection();
+                DisposeConnection();
+            }
+        }
+
+        protected void grdData_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            grdData.PageIndex = e.NewPageIndex;
+            BindStudentData();
         }
     }
 }
