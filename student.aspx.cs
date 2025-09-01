@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace LAB9
 {
-    public partial class demo : System.Web.UI.Page
+    public partial class student : System.Web.UI.Page
     {
         public string strconstr = ConfigurationManager.ConnectionStrings["mycon"].ConnectionString;
         public SqlCommand cmd;
