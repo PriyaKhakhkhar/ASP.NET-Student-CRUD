@@ -1,9 +1,9 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Student.aspx.cs" Inherits="ASPNetStudentCRUD.Student" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="student.aspx.cs" Inherits="LAB9.student" %>
 
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>Student Management</title>
+    <title>Student Management (CRUD)</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,11 +14,11 @@
 
         .container {
             width: 80%;
-            margin: 40px auto;
+            margin: 30px auto;
             background: #fff;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         h2 {
@@ -29,13 +29,14 @@
         .form-section {
             margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
             gap: 10px;
+            justify-content: space-between;
         }
 
         .form-section input[type="text"] {
-            width: 30%;
-            padding: 10px;
+            flex: 1;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 6px;
         }
@@ -44,7 +45,7 @@
             background: #0078d7;
             color: white;
             border: none;
-            padding: 10px 18px;
+            padding: 10px 16px;
             border-radius: 6px;
             cursor: pointer;
             transition: 0.3s;
@@ -57,17 +58,18 @@
         .gridview {
             width: 100%;
             margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .gridview th, .gridview td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
         }
 
         .gridview th {
             background: #0078d7;
             color: white;
-            padding: 10px;
-        }
-
-        .gridview td {
-            padding: 10px;
-            text-align: center;
         }
 
         .gridview tr:nth-child(even) {
@@ -84,23 +86,30 @@
         <div class="container">
             <h2>Student Management System (CRUD)</h2>
 
+            <!-- Input Fields -->
             <div class="form-section">
-                <asp:TextBox ID="txtName" runat="server" placeholder="Enter Student Name"></asp:TextBox>
-                <asp:TextBox ID="txtEmail" runat="server" placeholder="Enter Student Email"></asp:TextBox>
-                <asp:TextBox ID="txtCourse" runat="server" placeholder="Enter Course"></asp:TextBox>
-                <asp:Button ID="btnAdd" runat="server" Text="Add Student" CssClass="btn" OnClick="btnAdd_Click" />
+                <asp:TextBox ID="txtenroll" runat="server" placeholder="Enrollment No"></asp:TextBox>
+                <asp:TextBox ID="txtname" runat="server" placeholder="Student Name"></asp:TextBox>
+                <asp:TextBox ID="txtsem" runat="server" placeholder="Semester"></asp:TextBox>
+                <asp:TextBox ID="txtspi" runat="server" placeholder="SPI"></asp:TextBox>
+                <asp:TextBox ID="txtcpi" runat="server" placeholder="CPI"></asp:TextBox>
+                <asp:Button ID="btnsubmit" runat="server" Text="Add Student" CssClass="btn" OnClick="btnsubmit_Click" />
             </div>
 
-            <asp:GridView ID="GridView1" runat="server" CssClass="gridview" AutoGenerateColumns="False" DataKeyNames="Id"
-                OnRowEditing="GridView1_RowEditing" 
-                OnRowUpdating="GridView1_RowUpdating" 
-                OnRowCancelingEdit="GridView1_RowCancelingEdit" 
-                OnRowDeleting="GridView1_RowDeleting">
+            <!-- GridView -->
+            <asp:GridView ID="grdData" runat="server" CssClass="gridview" AutoGenerateColumns="False" DataKeyNames="EnrollmentNo"
+                AllowPaging="true" PageSize="5"
+                OnPageIndexChanging="grdData_PageIndexChanging"
+                OnRowEditing="grdData_RowEditing"
+                OnRowUpdating="grdData_RowUpdating"
+                OnRowCancelingEdit="grdData_RowCancelingEdit"
+                OnRowDeleting="grdData_RowDeleting">
                 <Columns>
-                    <asp:BoundField DataField="Id" HeaderText="ID" ReadOnly="true" />
-                    <asp:BoundField DataField="Name" HeaderText="Name" />
-                    <asp:BoundField DataField="Email" HeaderText="Email" />
-                    <asp:BoundField DataField="Course" HeaderText="Course" />
+                    <asp:BoundField DataField="EnrollmentNo" HeaderText="Enrollment No" ReadOnly="true" />
+                    <asp:BoundField DataField="StudentName" HeaderText="Name" />
+                    <asp:BoundField DataField="StudentSemester" HeaderText="Semester" />
+                    <asp:BoundField DataField="StudentSPI" HeaderText="SPI" />
+                    <asp:BoundField DataField="StudentCPI" HeaderText="CPI" />
                     <asp:CommandField ShowEditButton="true" ShowDeleteButton="true" />
                 </Columns>
             </asp:GridView>
