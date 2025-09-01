@@ -1,34 +1,56 @@
-# ASP.NET Student CRUD  
+# Student Management System (ASP.NET WebForms + SQL Server)
 
-A simple **Student Management System** built with **ASP.NET Web Forms**, demonstrating **CRUD operations (Create, Read, Update, Delete)** using **GridView** and **SQL Server Stored Procedures**.  
-
----
-
-## 🚀 Features
-- Add new student records  
-- View all students in a GridView  
-- Update existing student information  
-- Delete student records  
+A simple CRUD (Create, Read, Update, Delete) application built using ASP.NET WebForms and SQL Server.
 
 ---
 
-## 📂 Project Structure
-- `/DatabaseScripts/student.sql` → SQL script for table + stored procedure  
-- `/WebForms/demo.aspx` → ASP.NET Web Form with GridView  
-- `/WebForms/demo.aspx.cs` → CodeBehind (C# logic)  
-- `web.config` → Database connection string  
+## Features
+- Add new students
+- Edit student details
+- Delete students
+- View all students in a grid
+- Uses Stored Procedure (Student_Crud) for all operations
 
 ---
 
-## 🛠️ Technologies Used
-- ASP.NET Web Forms (C#)  
-- SQL Server (Stored Procedures)  
-- ADO.NET (SqlCommand, DataSet, SqlDataAdapter)
-  
+## Setup Instructions
+
+### 1. Database Setup
+1. Open SQL Server Management Studio (SSMS).
+2. Create a new database named StudentDB.
+3. Run the provided script file `StudentDB.sql` from this repository to create:
+   - Student table
+   - Student_Crud stored procedure
+   - Sample data
+
 ---
 
-## ▶️ How to Run
-1. Create a SQL Server database `DB(106)`  
-2. Run the script from `/DatabaseScripts/student.sql`  
-3. Update the connection string (`mycon`) in `web.config`  
-4. Open the solution in Visual Studio and run `demo.aspx`  
+### 2. Configure Connection String
+In your project’s Web.config, update the connection string:
+
+<connectionStrings>
+  <add name="mycon" 
+       connectionString="Data Source=YOUR_SERVER_NAME;Initial Catalog=StudentDB;Integrated Security=True;" 
+       providerName="System.Data.SqlClient" />
+</connectionStrings>
+
+➡ Replace `YOUR_SERVER_NAME` with your SQL Server instance (example: .\SQLEXPRESS or localhost).
+
+---
+
+### 3. Run the Project
+1. Open the project in Visual Studio.
+2. Build the solution (Ctrl + Shift + B).
+3. Press F5 or run without debugging.
+
+---
+
+## Technologies Used
+- ASP.NET WebForms
+- C#
+- SQL Server
+- ADO.NET
+
+---
+
+✅ You’re now ready to use the Student Management System!
